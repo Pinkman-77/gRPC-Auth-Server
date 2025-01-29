@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Pinkman-77/grpc-auth/pkg/app"
 	"github.com/Pinkman-77/grpc-auth/pkg/config"
 	"log/slog"
 	"os"
@@ -18,6 +19,14 @@ func main() {
 		slog.Any("cfg", cfg.Env),
 		slog.Int("Port", cfg.Grpc.Port),
 	)
+
+	application := app.NewApp(log, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenTll)
+
+	if err := application.Run(); err != nil {
+		log.Error("failed to start gRPC server", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	log.Debug("debug message")
 	log.Info("info message")
 	log.Warn("warm message")
@@ -31,9 +40,9 @@ func main() {
 
 	log.Info("signal received", slog.Any("sign", sign))
 
-	log.Info("The Server closed")
-}
+	application.Stop()
 
+}
 func setupLogs(env string) *slog.Logger {
 
 	const (
