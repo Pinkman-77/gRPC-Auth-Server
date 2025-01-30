@@ -20,30 +20,34 @@ type GrpcConf struct {
 	Timeout time.Duration `yaml:timeout`
 }
 
-func MustLoadConfig() *Config {
-	path := fetchConfgPath()
-
-	if path == "" {
-		panic("config path is not set")
+func MustLoad() *Config {
+	configPath := fetchConfigPath()
+	if configPath == "" {
+		panic("config path is empty")
 	}
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		panic("config file not found")
+	return MustLoadPath(configPath)
+}
+
+func MustLoadPath(configPath string) *Config {
+	// check if file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		panic("config file does not exist: " + configPath)
 	}
 
 	var cfg Config
 
-	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
-		panic("failed to read config file: " + err.Error())
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		panic("cannot read config: " + err.Error())
 	}
+
 	return &cfg
 }
 
-func fetchConfgPath() string {
+func fetchConfigPath() string {
 	var res string
 
 	flag.StringVar(&res, "config", "", "path to config file")
-
 	flag.Parse()
 
 	if res == "" {

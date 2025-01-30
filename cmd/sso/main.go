@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	cfg := config.MustLoadConfig()
+	cfg := config.MustLoad()
 	log := setupLogs(cfg.Env)
 
 	log.Info(
